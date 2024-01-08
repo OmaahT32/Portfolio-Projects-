@@ -1,3 +1,11 @@
+/*
+Covid 19 Data Exploration 
+
+Skills used: Joins, CTE's, Temp Tables, Windows Functions, Aggregate Functions, Creating Views, Converting Data Types
+
+*/
+
+
 --SELECT *
 --FROM PortfolioProject..[Covid-Vaccinations]
 --ORDER BY 3,4 
@@ -57,7 +65,7 @@ order by TotalDeathCount desc
 
 -- GLOBAL NUMBERS
 
-Select SUM(new_cases) as total_cases, SUM(cast(new_deaths as int)) as total_deaths, SUM(cast(new_deaths as int))/SUM(new_cases)*100 as DeathPercentage
+Select SUM(new_cases) as total_cases_per_millions, SUM(cast(new_deaths as int)) as total_deaths, SUM(cast(new_deaths as int))/SUM(new_cases)*100 as DeathPercentage
 From PortfolioProject..CovidDeaths
 --Where location like '%african%'
 where continent is not null 
@@ -69,7 +77,7 @@ order by 1,2
 
 Select dea.continent, dea.location, dea.date, dea.[population], vac.new_vaccinations
 , SUM(CONVERT(int,vac.new_vaccinations)) OVER (Partition by dea.location Order by dea.location, dea.date) as RollingPeopleVaccinated
---, (RollingPeopleVaccinated/population)*100
+--, (RollingPeopleVaccinated/[population])*100
 From PortfolioProject..CovidDeaths dea
 Join PortfolioProject..CovidVaccinations vac
 	On dea.location = vac.location
@@ -85,7 +93,7 @@ as
 (
 Select dea.continent, dea.location, dea.date, dea.[population], vac.new_vaccinations
 , SUM(CONVERT(int,vac.new_vaccinations)) OVER (Partition by dea.Location Order by dea.location, dea.Date) as RollingPeopleVaccinated
---, (RollingPeopleVaccinated/population)*100
+--, (RollingPeopleVaccinated/[population])*100
 From PortfolioProject..CovidDeaths dea
 Join PortfolioProject..CovidVaccinations vac
 	On dea.location = vac.location
@@ -106,7 +114,7 @@ Create Table #PercentPopulationVaccinated
 Continent nvarchar(255),
 Location nvarchar(255),
 Date datetime,
-Population numeric,
+[Population] numeric,
 New_vaccinations numeric,
 RollingPeopleVaccinated numeric
 )
@@ -114,7 +122,7 @@ RollingPeopleVaccinated numeric
 Insert into #PercentPopulationVaccinated
 Select dea.continent, dea.location, dea.date, dea.[population], vac.new_vaccinations
 , SUM(CONVERT(int,vac.new_vaccinations)) OVER (Partition by dea.Location Order by dea.location, dea.Date) as RollingPeopleVaccinated
---, (RollingPeopleVaccinated/population)*100
+--, (RollingPeopleVaccinated/[population])*100
 From PortfolioProject..CovidDeaths dea
 Join PortfolioProject..CovidVaccinations vac
 	On dea.location = vac.location
